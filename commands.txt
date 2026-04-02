@@ -1,6 +1,5 @@
-# Conversion commands for docs.crpt.ru_gismt_True_API_.htm -> .md
-# Run from repo root (doca/)
-# Source file: src/docs.crpt.ru_gismt_True_API_.htm
+# Conversion commands for src/docs.crpt.ru_gismt_True_API_.htm -> .md
+# Run from repo root
 
 # 1. Pandoc (GFM output)
 pandoc "src/docs.crpt.ru_gismt_True_API_.htm" -f html-native_divs-native_spans -t gfm --wrap=none -o "mds/pandoc/README.md"
