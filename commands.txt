@@ -1,28 +1,29 @@
 # Conversion commands for docs.crpt.ru_gismt_True_API_.htm -> .md
-# Source file: docs.crpt.ru_gismt_True_API_.htm
+# Run from repo root (doca/)
+# Source file: src/docs.crpt.ru_gismt_True_API_.htm
 
 # 1. Pandoc (GFM output)
-pandoc "docs.crpt.ru_gismt_True_API_.htm" -f html-native_divs-native_spans -t gfm --wrap=none -o "pandoc/README.md"
+pandoc "src/docs.crpt.ru_gismt_True_API_.htm" -f html-native_divs-native_spans -t gfm --wrap=none -o "mds/pandoc/README.md"
 
 # 2. html2text (Python)
 python -c "
 import html2text
 h = html2text.HTML2Text()
 h.body_width = 0
-with open('docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
+with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
     html = f.read()
 md = h.handle(html)
-with open('html2text/README.md', 'w', encoding='utf-8') as f:
+with open('mds/html2text/README.md', 'w', encoding='utf-8') as f:
     f.write(md)
 "
 
 # 3. markdownify (Python)
 python -c "
 from markdownify import markdownify as md_convert
-with open('docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
+with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
     html = f.read()
 md = md_convert(html, heading_style='ATX', strip=['script','style'])
-with open('markdownify/README.md', 'w', encoding='utf-8') as f:
+with open('mds/markdownify/README.md', 'w', encoding='utf-8') as f:
     f.write(md)
 "
 
@@ -31,9 +32,9 @@ node -e "
 const TurndownService = require('turndown');
 const {gfm} = require('turndown-plugin-gfm');
 const fs = require('fs');
-const html = fs.readFileSync('docs.crpt.ru_gismt_True_API_.htm', 'utf8');
+const html = fs.readFileSync('src/docs.crpt.ru_gismt_True_API_.htm', 'utf8');
 const td = new TurndownService({headingStyle: 'atx', codeBlockStyle: 'fenced'});
 td.use(gfm);
 const md = td.turndown(html);
-fs.writeFileSync('turndown/README.md', md, 'utf8');
+fs.writeFileSync('mds/turndown/README.md', md, 'utf8');
 "
