@@ -1,0 +1,69 @@
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100;
+    src: url("./Inter/Inter-Thin.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 200;
+    src: url("./Inter/Inter-ExtraLight.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 300;
+    src: url("./Inter/Inter-Light.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 400;
+    src: url("./Inter/Inter-Regular.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 500;
+    src: url("./Inter/Inter-Medium.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 600;
+    src: url("./Inter/Inter-SemiBold.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 700;
+    src: url("./Inter/Inter-Bold.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 800;
+    src: url("./Inter/Inter-ExtraBold.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 900;
+    src: url("./Inter/Inter-Black.ttf") format("truetype");
+}
