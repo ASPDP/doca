@@ -17,6 +17,8 @@ import os
 import re
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md_convert
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from common import extract_images
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
@@ -43,6 +45,9 @@ if link_base:
     for a in soup.find_all('a', href=True):
         if a['href'].startswith(link_base + '#'):
             a['href'] = a['href'].replace(link_base, '')
+
+# Extract base64 images to files
+n_imgs = extract_images(soup, output_dir)
 
 # Protect complex tables
 complex_tables = {}

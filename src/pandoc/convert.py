@@ -11,6 +11,8 @@ import sys
 import os
 import subprocess
 from bs4 import BeautifulSoup
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from common import extract_images
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
@@ -37,6 +39,9 @@ for h in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
     if h.get('id'):
         anchor = soup.new_tag('a', id=h['id'])
         h.insert(0, anchor)
+
+# Extract base64 images to files
+n_imgs = extract_images(soup, output_dir)
 
 # Code language on <pre>
 for code in soup.find_all('code', attrs={'data-lang': True}):
