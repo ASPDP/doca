@@ -1,0 +1,55 @@
+"""Pandoc converter with pre-processing.
+
+Pre-processes HTML:
+- Converts internal docs.crpt.ru links to #anchor links
+- Copies data-lang from <code> to <pre> class for language detection
+- Inserts <a id="..."> anchors inside headings for internal link targets
+
+Usage: python convert.py <input.htm> <output_dir>
+"""
+import sys
+import os
+import subprocess
+from bs4 import BeautifulSoup
+
+input_file = sys.argv[1]
+output_dir = sys.argv[2]
+os.makedirs(output_dir, exist_ok=True)
+
+with open(input_file, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+soup = BeautifulSoup(html, 'html.parser')
+
+# Internal links
+for a in soup.find_all('a', href=True):
+    if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
+        a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+
+# Anchor IDs inside headings
+for h in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+    if h.get('id'):
+        anchor = soup.new_tag('a', id=h['id'])
+        h.insert(0, anchor)
+
+# Code language on <pre>
+for code in soup.find_all('code', attrs={'data-lang': True}):
+    lang = code['data-lang']
+    pre = code.find_parent('pre')
+    if pre:
+        pre['class'] = ['language-' + lang]
+
+preprocessed = os.path.join(output_dir, '_preprocessed.htm')
+with open(preprocessed, 'w', encoding='utf-8') as f:
+    f.write(str(soup))
+
+output_file = os.path.join(output_dir, 'README.md')
+subprocess.run([
+    'pandoc', preprocessed,
+    '-f', 'html-native_divs-native_spans',
+    '-t', 'gfm',
+    '--wrap=none',
+    '-o', output_file
+], check=True)
+
+print(f'Pandoc: {input_file} -> {output_file}')

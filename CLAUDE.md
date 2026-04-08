@@ -4,10 +4,22 @@
 
 HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documentation.
 
+## Project structure
+
+- `source htmls/` — original HTML files (input)
+- `src/<converter>/` — conversion scripts (one per converter: pandoc, markdownify, html2text, turndown)
+- `mds/<html_name>/<converter>/README.md` — conversion output
+- `convert_all.sh` — runs all converters for all sources
+
 ## Rules
 
-- When fixing or re-running any conversion, always update `commands.txt` with the exact commands used so the user can reproduce manually.
+- When fixing or re-running any conversion, update the corresponding script in `src/`.
+- Run `bash convert_all.sh` to regenerate all outputs.
 
 ## Conversion notes
 
-- **Turndown: `<p>` inside table cells** — Turndown breaks markdown table rows when `<td>`/`<th>` contain `<p>` elements (adds newlines that split a single row across multiple lines). Fixed with a custom `tableCellParagraph` rule that strips `<p>` wrappers inside cells. This rule only affects the conversion process, not the source HTML.
+- **Complex tables** — Tables with cells containing multiple block elements (`<p>`, `<ul>`, `<ol>`, `<pre>`) are kept as raw HTML in all converters. Simple tables are converted to GFM pipe tables.
+- **Turndown: `<p>` inside simple table cells** — Custom `tableCellParagraph` rule strips `<p>` wrappers inside cells so rows stay on one line.
+- **Code language** — Extracted from `<code data-lang="...">` attribute, not hardcoded.
+- **Internal links** — `https://docs.crpt.ru/gismt/True_API/#...` replaced with `#...` anchors. Heading IDs from HTML are preserved via `<a id>` or `<span id>` elements.
+- **CSS/JS cleanup** — `<style>` and `<script>` tags stripped before conversion (does not modify source HTML).
