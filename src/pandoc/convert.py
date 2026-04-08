@@ -12,7 +12,7 @@ import os
 import subprocess
 from bs4 import BeautifulSoup
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from common import extract_images
+from common import extract_images, generate_toc
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
@@ -62,5 +62,12 @@ subprocess.run([
     '--wrap=none',
     '-o', output_file
 ], check=True)
+
+# Generate TOC
+with open(output_file, 'r', encoding='utf-8') as f:
+    md = f.read()
+md = generate_toc(md)
+with open(output_file, 'w', encoding='utf-8') as f:
+    f.write(md)
 
 print(f'Pandoc: {input_file} -> {output_file}')

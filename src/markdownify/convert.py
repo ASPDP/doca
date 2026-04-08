@@ -18,7 +18,7 @@ import re
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md_convert
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from common import extract_images
+from common import extract_images, generate_toc
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
@@ -86,6 +86,9 @@ def insert_anchor(m):
 
 
 md = re.sub(r'^(#{1,6}) (.+)$', insert_anchor, md, flags=re.MULTILINE)
+
+# Generate TOC
+md = generate_toc(md)
 
 output_file = os.path.join(output_dir, 'README.md')
 with open(output_file, 'w', encoding='utf-8') as f:
