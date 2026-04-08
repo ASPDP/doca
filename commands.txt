@@ -2,15 +2,19 @@
 # Run from repo root
 
 # 1. Pandoc (GFM output)
-# Pre-process: copy data-lang from <code> to <pre> class so Pandoc picks up the language
+# Pre-process: data-lang on <pre>, internal links, anchor ids on headings
 python -c "
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
     html = f.read()
 soup = BeautifulSoup(html, 'html.parser')
 for a in soup.find_all('a', href=True):
     if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
         a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+for h in soup.find_all(['h1','h2','h3','h4','h5','h6']):
+    if h.get('id'):
+        anchor = soup.new_tag('a', id=h['id'])
+        h.insert(0, anchor)
 for code in soup.find_all('code', attrs={'data-lang': True}):
     lang = code['data-lang']
     pre = code.find_parent('pre')
@@ -39,6 +43,11 @@ for pre in soup.find_all('pre', class_='highlight'):
         # Use first 60 chars of text content as key
         key = code.get_text()[:60].strip()
         lang_map[key] = code['data-lang']
+# Build heading text -> id map
+heading_ids = {}
+for h_tag in soup.find_all(['h1','h2','h3','h4','h5','h6']):
+    if h_tag.get('id'):
+        heading_ids[h_tag.get_text().strip()] = h_tag['id']
 h = html2text.HTML2Text()
 h.body_width = 0
 html = html.replace('https://docs.crpt.ru/gismt/True_API/#', '#')
@@ -75,8 +84,17 @@ while i < len(lines):
     else:
         result.append(lines[i])
         i += 1
+md = '\n'.join(result)
+# Insert anchor ids before headings
+def insert_anchor(m):
+    hashes, text = m.group(1), m.group(2).strip()
+    hid = heading_ids.get(text, '')
+    if hid:
+        return '<a id=\"' + hid + '\"></a>\n\n' + hashes + ' ' + text
+    return m.group(0)
+md = re.sub(r'^(#{1,6}) (.+)$', insert_anchor, md, flags=re.MULTILINE)
 with open('mds/html2text/README.md', 'w', encoding='utf-8') as f:
-    f.write('\n'.join(result))
+    f.write(md)
 "
 
 # 3. markdownify (Python)
@@ -95,7 +113,19 @@ for tag in soup.find_all(['script', 'style']):
 for a in soup.find_all('a', href=True):
     if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
         a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+heading_ids = {}
+for h in soup.find_all(['h1','h2','h3','h4','h5','h6']):
+    if h.get('id'):
+        heading_ids[h.get_text().strip()] = h['id']
 md = md_convert(str(soup), heading_style='ATX', code_language_callback=get_lang)
+import re
+def insert_anchor(m):
+    hashes, text = m.group(1), m.group(2).strip()
+    hid = heading_ids.get(text, '')
+    if hid:
+        return '<a id=\"' + hid + '\"></a>\n\n' + hashes + ' ' + text
+    return m.group(0)
+md = re.sub(r'^(#{1,6}) (.+)$', insert_anchor, md, flags=re.MULTILINE)
 with open('mds/markdownify/README.md', 'w', encoding='utf-8') as f:
     f.write(md)
 "
@@ -110,6 +140,13 @@ let html = fs.readFileSync('src/docs.crpt.ru_gismt_True_API_.htm', 'utf8');
 html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
 html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
 html = html.replace(/https:\/\/docs\.crpt\.ru\/gismt\/True_API\/#/g, '#');
+// Build heading text -> id map
+const headingIds = {};
+const hRe = /<h[1-6]\s+id=\"([^\"]*)\"[^>]*>([\s\S]*?)<\/h[1-6]>/gi;
+let hm;
+while ((hm = hRe.exec(html)) !== null) {
+  headingIds[hm[2].replace(/<[^>]*>/g, '').trim()] = hm[1];
+}
 const td = new TurndownService({headingStyle: 'atx', codeBlockStyle: 'fenced'});
 td.use(gfm);
 td.addRule('tableCellParagraph', {
@@ -118,6 +155,13 @@ td.addRule('tableCellParagraph', {
   },
   replacement: function(content) { return content.trim(); }
 });
-const md = td.turndown(html);
+let md = td.turndown(html);
+// Post-process: insert anchor ids before headings
+md = md.replace(/^(#{1,6}) (.+)$/gm, function(match, hashes, text) {
+  const clean = text.replace(/\\\*/g, '*').replace(/\\\[/g, '[').replace(/\\\]/g, ']').trim();
+  const hid = headingIds[clean] || headingIds[text.trim()];
+  if (hid) return '<a id=\"' + hid + '\"></a>\n\n' + hashes + ' ' + text;
+  return match;
+});
 fs.writeFileSync('mds/turndown/README.md', md, 'utf8');
 "
