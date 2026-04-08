@@ -41,12 +41,12 @@ def extract_images(soup, output_dir):
     return count
 
 
-def generate_toc(md):
+def generate_toc(md, source_url=''):
     """Generate a table of contents from markdown headings and prepend it.
 
     Scans for ATX headings (## ... ######), uses existing <a id="..."> or
     <span id="..."> anchors when available, falls back to GitHub-style anchors.
-    Inserts TOC after the first H1 (or at the top if no H1).
+    Inserts TOC (and optional source URL) after the first H1 (or at the top).
     """
     # Match headings, optionally preceded by <a id="..."></a> on previous line
     anchor_heading_re = re.compile(
@@ -78,7 +78,10 @@ def generate_toc(md):
         return md
 
     min_level = min(h[0] for h in headings)
-    toc_lines = ['## Оглавление\n']
+    toc_lines = []
+    if source_url:
+        toc_lines.append(f'> Оригинал: <{source_url}>\n')
+    toc_lines.append('## Оглавление\n')
     for level, display, anchor in headings:
         indent = '  ' * (level - min_level)
         toc_lines.append(f'{indent}- [{display}](#{anchor})')

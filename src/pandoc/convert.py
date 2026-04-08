@@ -66,7 +66,7 @@ subprocess.run([
 # Generate TOC
 with open(output_file, 'r', encoding='utf-8') as f:
     md = f.read()
-md = generate_toc(md)
+md = generate_toc(md, source_url=link_base)
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write(md)
 
