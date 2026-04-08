@@ -48,10 +48,22 @@ heading_ids = {}
 for h_tag in soup.find_all(['h1','h2','h3','h4','h5','h6']):
     if h_tag.get('id'):
         heading_ids[h_tag.get_text().strip()] = h_tag['id']
+# Protect complex tables from conversion
+complex_tables = {}
+for idx, table in enumerate(soup.find_all('table')):
+    is_complex = False
+    for cell in table.find_all(['td', 'th']):
+        if len(cell.find_all(['p', 'ul', 'ol', 'pre'])) > 1:
+            is_complex = True
+            break
+    if is_complex:
+        placeholder = 'COMPLEX_TABLE_%d' % idx
+        complex_tables[placeholder] = str(table)
+        table.replace_with(placeholder)
 h = html2text.HTML2Text()
 h.body_width = 0
-html = html.replace('https://docs.crpt.ru/gismt/True_API/#', '#')
-md = h.handle(html)
+html2 = str(soup).replace('https://docs.crpt.ru/gismt/True_API/#', '#')
+md = h.handle(html2)
 # Replace indented code blocks with fenced ones, adding lang where possible
 lines = md.split('\n')
 result = []
@@ -93,6 +105,9 @@ def insert_anchor(m):
         return '<a id=\"' + hid + '\"></a>\n\n' + hashes + ' ' + text
     return m.group(0)
 md = re.sub(r'^(#{1,6}) (.+)$', insert_anchor, md, flags=re.MULTILINE)
+# Restore complex tables as raw HTML
+for placeholder, html_table in complex_tables.items():
+    md = md.replace(placeholder, '\n\n' + html_table + '\n\n')
 with open('mds/html2text/README.md', 'w', encoding='utf-8') as f:
     f.write(md)
 "
@@ -113,11 +128,27 @@ for tag in soup.find_all(['script', 'style']):
 for a in soup.find_all('a', href=True):
     if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
         a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+# Protect complex tables (cells with multiple block elements) from conversion
+from markdownify import markdownify as md_inner
+complex_tables = {}
+for idx, table in enumerate(soup.find_all('table')):
+    is_complex = False
+    for cell in table.find_all(['td', 'th']):
+        if len(cell.find_all(['p', 'ul', 'ol', 'pre'])) > 1:
+            is_complex = True
+            break
+    if is_complex:
+        placeholder = 'COMPLEXTABLE%d' % idx
+        complex_tables[placeholder] = str(table)
+        table.replace_with(placeholder)
 heading_ids = {}
 for h in soup.find_all(['h1','h2','h3','h4','h5','h6']):
     if h.get('id'):
         heading_ids[h.get_text().strip()] = h['id']
 md = md_convert(str(soup), heading_style='ATX', code_language_callback=get_lang)
+# Restore complex tables as raw HTML
+for placeholder, html_table in complex_tables.items():
+    md = md.replace(placeholder, '\n\n' + html_table + '\n\n')
 import re
 def insert_anchor(m):
     hashes, text = m.group(1), m.group(2).strip()
@@ -149,9 +180,32 @@ while ((hm = hRe.exec(html)) !== null) {
 }
 const td = new TurndownService({headingStyle: 'atx', codeBlockStyle: 'fenced'});
 td.use(gfm);
+// Keep complex tables (cells with multiple <p>, <ul>, <ol>) as raw HTML
+td.addRule('complexTable', {
+  filter: function(node) {
+    if (node.nodeName !== 'TABLE') return false;
+    var cells = node.querySelectorAll('td, th');
+    for (var i = 0; i < cells.length; i++) {
+      var blocks = cells[i].querySelectorAll('p, ul, ol, pre');
+      if (blocks.length > 1) return true;
+    }
+    return false;
+  },
+  replacement: function(content, node) { return '\n\n' + node.outerHTML + '\n\n'; }
+});
+// For simple tables: strip <p> inside cells so rows stay on one line
 td.addRule('tableCellParagraph', {
   filter: function(node) {
-    return node.nodeName === 'P' && node.parentNode && (node.parentNode.nodeName === 'TD' || node.parentNode.nodeName === 'TH');
+    if (node.nodeName !== 'P' || !node.parentNode) return false;
+    if (node.parentNode.nodeName !== 'TD' && node.parentNode.nodeName !== 'TH') return false;
+    // Only apply to simple tables (not already handled by complexTable)
+    var table = node.closest('table');
+    if (!table) return false;
+    var cells = table.querySelectorAll('td, th');
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i].querySelectorAll('p, ul, ol, pre').length > 1) return false;
+    }
+    return true;
   },
   replacement: function(content) { return content.trim(); }
 });
