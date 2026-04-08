@@ -22,6 +22,10 @@ with open(input_file, 'r', encoding='utf-8') as f:
 
 soup = BeautifulSoup(html, 'html.parser')
 
+# Strip style/script
+for tag in soup.find_all(['script', 'style']):
+    tag.decompose()
+
 # Internal links
 if link_base:
     for a in soup.find_all('a', href=True):
