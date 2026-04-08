@@ -2,31 +2,100 @@
 # Run from repo root
 
 # 1. Pandoc (GFM output)
-pandoc "src/docs.crpt.ru_gismt_True_API_.htm" -f html-native_divs-native_spans -t gfm --wrap=none -o "mds/pandoc/README.md"
-
-# 2. html2text (Python)
+# Pre-process: copy data-lang from <code> to <pre> class so Pandoc picks up the language
 python -c "
-import html2text
-h = html2text.HTML2Text()
-h.body_width = 0
+from bs4 import BeautifulSoup
 with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
     html = f.read()
+soup = BeautifulSoup(html, 'html.parser')
+for a in soup.find_all('a', href=True):
+    if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
+        a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+for code in soup.find_all('code', attrs={'data-lang': True}):
+    lang = code['data-lang']
+    pre = code.find_parent('pre')
+    if pre:
+        pre['class'] = ['language-' + lang]
+with open('mds/pandoc/_preprocessed.htm', 'w', encoding='utf-8') as f:
+    f.write(str(soup))
+"
+pandoc "mds/pandoc/_preprocessed.htm" -f html-native_divs-native_spans -t gfm --wrap=none -o "mds/pandoc/README.md"
+
+# 2. html2text (Python)
+# Post-process: convert indented code blocks to fenced with language from
+# data-lang attributes. html2text doesn't support fenced blocks natively.
+python -c "
+import re
+from bs4 import BeautifulSoup
+import html2text
+with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
+    html = f.read()
+soup = BeautifulSoup(html, 'html.parser')
+# Build a map of code text -> lang from the HTML
+lang_map = {}
+for pre in soup.find_all('pre', class_='highlight'):
+    code = pre.find('code', attrs={'data-lang': True})
+    if code:
+        # Use first 60 chars of text content as key
+        key = code.get_text()[:60].strip()
+        lang_map[key] = code['data-lang']
+h = html2text.HTML2Text()
+h.body_width = 0
+html = html.replace('https://docs.crpt.ru/gismt/True_API/#', '#')
 md = h.handle(html)
+# Replace indented code blocks with fenced ones, adding lang where possible
+lines = md.split('\n')
+result = []
+i = 0
+while i < len(lines):
+    # Detect indented code block (4+ spaces or tab)
+    if lines[i].startswith('    ') or lines[i].startswith('\t'):
+        block = []
+        while i < len(lines) and (lines[i].startswith('    ') or lines[i].startswith('\t') or lines[i].strip() == ''):
+            if lines[i].strip() == '' and i + 1 < len(lines) and not (lines[i+1].startswith('    ') or lines[i+1].startswith('\t')):
+                break
+            block.append(lines[i])
+            i += 1
+        # Strip leading indent
+        code_lines = []
+        for l in block:
+            if l.startswith('    '):
+                code_lines.append(l[4:])
+            elif l.startswith('\t'):
+                code_lines.append(l[1:])
+            else:
+                code_lines.append(l)
+        code_text = '\n'.join(code_lines).strip()
+        # Try to find language
+        key = code_text[:60].strip()
+        lang = lang_map.get(key, '')
+        result.append('\`\`\`' + lang)
+        result.append(code_text)
+        result.append('\`\`\`')
+    else:
+        result.append(lines[i])
+        i += 1
 with open('mds/html2text/README.md', 'w', encoding='utf-8') as f:
-    f.write(md)
+    f.write('\n'.join(result))
 "
 
 # 3. markdownify (Python)
-# Pre-strip <style> and <script> tags with BeautifulSoup before conversion
+# Pre-strip <style>/<script>; extract code language from <code data-lang>
 python -c "
 from markdownify import markdownify as md_convert
 from bs4 import BeautifulSoup
+def get_lang(el):
+    code = el.find('code', attrs={'data-lang': True})
+    return code['data-lang'] if code else ''
 with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
     html = f.read()
 soup = BeautifulSoup(html, 'html.parser')
 for tag in soup.find_all(['script', 'style']):
     tag.decompose()
-md = md_convert(str(soup), heading_style='ATX')
+for a in soup.find_all('a', href=True):
+    if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
+        a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+md = md_convert(str(soup), heading_style='ATX', code_language_callback=get_lang)
 with open('mds/markdownify/README.md', 'w', encoding='utf-8') as f:
     f.write(md)
 "
@@ -40,6 +109,7 @@ const fs = require('fs');
 let html = fs.readFileSync('src/docs.crpt.ru_gismt_True_API_.htm', 'utf8');
 html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
 html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+html = html.replace(/https:\/\/docs\.crpt\.ru\/gismt\/True_API\/#/g, '#');
 const td = new TurndownService({headingStyle: 'atx', codeBlockStyle: 'fenced'});
 td.use(gfm);
 td.addRule('tableCellParagraph', {
