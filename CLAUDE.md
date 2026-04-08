@@ -22,3 +22,4 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 - **Code language** — Extracted from `<code data-lang="...">` attribute, not hardcoded.
 - **Internal links** — `https://docs.crpt.ru/gismt/True_API/#...` replaced with `#...` anchors. Heading IDs from HTML are preserved via `<a id>` or `<span id>` elements.
 - **CSS/JS cleanup** — `<style>` and `<script>` tags stripped before conversion (does not modify source HTML).
+- **Base64 images** — `data:` URI images are extracted to `images/` directory alongside the output markdown.
