@@ -27,6 +27,7 @@ with open('mds/markdownify/README.md', 'w', encoding='utf-8') as f:
 "
 
 # 4. Turndown (Node.js + GFM plugin)
+# Custom rule: strip <p> inside <td>/<th> so table rows stay on one line
 node -e "
 const TurndownService = require('turndown');
 const {gfm} = require('turndown-plugin-gfm');
@@ -34,6 +35,12 @@ const fs = require('fs');
 const html = fs.readFileSync('src/docs.crpt.ru_gismt_True_API_.htm', 'utf8');
 const td = new TurndownService({headingStyle: 'atx', codeBlockStyle: 'fenced'});
 td.use(gfm);
+td.addRule('tableCellParagraph', {
+  filter: function(node) {
+    return node.nodeName === 'P' && node.parentNode && (node.parentNode.nodeName === 'TD' || node.parentNode.nodeName === 'TH');
+  },
+  replacement: function(content) { return content.trim(); }
+});
 const md = td.turndown(html);
 fs.writeFileSync('mds/turndown/README.md', md, 'utf8');
 "
