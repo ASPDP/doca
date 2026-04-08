@@ -7,7 +7,7 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 ## Project structure
 
 - `source htmls/` — original HTML files (input)
-- `src/<converter>/` — conversion scripts (one per converter: pandoc, markdownify, html2text, turndown)
+- `src/<converter>/` — conversion scripts (pandoc, markdownify)
 - `mds/<html_name>/<converter>/README.md` — conversion output
 - `convert_all.sh` — runs all converters for all sources
 
@@ -19,7 +19,6 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 ## Conversion notes
 
 - **Complex tables** — Tables with cells containing multiple block elements (`<p>`, `<ul>`, `<ol>`, `<pre>`) are kept as raw HTML in all converters. Simple tables are converted to GFM pipe tables.
-- **Turndown: `<p>` inside simple table cells** — Custom `tableCellParagraph` rule strips `<p>` wrappers inside cells so rows stay on one line.
 - **Code language** — Extracted from `<code data-lang="...">` attribute, not hardcoded.
 - **Internal links** — `https://docs.crpt.ru/gismt/True_API/#...` replaced with `#...` anchors. Heading IDs from HTML are preserved via `<a id>` or `<span id>` elements.
 - **CSS/JS cleanup** — `<style>` and `<script>` tags stripped before conversion (does not modify source HTML).
