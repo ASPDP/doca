@@ -8,6 +8,7 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 
 - `source htmls/` — original HTML files (input)
 - `src/<converter>/` — conversion scripts (pandoc, markdownify)
+- `src/common.py` — shared pre-processing utilities
 - `mds/<html_name>/<converter>/README.md` — conversion output
 - `convert_all.sh` — runs all converters for all sources
 
