@@ -17,22 +17,29 @@ with open('mds/html2text/README.md', 'w', encoding='utf-8') as f:
 "
 
 # 3. markdownify (Python)
+# Pre-strip <style> and <script> tags with BeautifulSoup before conversion
 python -c "
 from markdownify import markdownify as md_convert
+from bs4 import BeautifulSoup
 with open('src/docs.crpt.ru_gismt_True_API_.htm', 'r', encoding='utf-8') as f:
     html = f.read()
-md = md_convert(html, heading_style='ATX', strip=['script','style'])
+soup = BeautifulSoup(html, 'html.parser')
+for tag in soup.find_all(['script', 'style']):
+    tag.decompose()
+md = md_convert(str(soup), heading_style='ATX')
 with open('mds/markdownify/README.md', 'w', encoding='utf-8') as f:
     f.write(md)
 "
 
 # 4. Turndown (Node.js + GFM plugin)
-# Custom rule: strip <p> inside <td>/<th> so table rows stay on one line
+# Pre-strip <style>/<script> tags; custom rule: strip <p> inside <td>/<th>
 node -e "
 const TurndownService = require('turndown');
 const {gfm} = require('turndown-plugin-gfm');
 const fs = require('fs');
-const html = fs.readFileSync('src/docs.crpt.ru_gismt_True_API_.htm', 'utf8');
+let html = fs.readFileSync('src/docs.crpt.ru_gismt_True_API_.htm', 'utf8');
+html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
 const td = new TurndownService({headingStyle: 'atx', codeBlockStyle: 'fenced'});
 td.use(gfm);
 td.addRule('tableCellParagraph', {
