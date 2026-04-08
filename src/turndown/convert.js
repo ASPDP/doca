@@ -14,7 +14,7 @@
  * Post-processes markdown:
  * - Inserts <a id="..."> anchors before headings
  *
- * Usage: node convert.js <input.htm> <output_dir>
+ * Usage: node convert.js <input.htm> <output_dir> [internal_link_base]
  */
 const TurndownService = require('turndown');
 const { gfm } = require('turndown-plugin-gfm');
@@ -23,6 +23,7 @@ const path = require('path');
 
 const inputFile = process.argv[2];
 const outputDir = process.argv[3];
+const linkBase = process.argv[4] || '';
 
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -33,7 +34,10 @@ html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
 html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
 
 // Internal links
-html = html.replace(/https:\/\/docs\.crpt\.ru\/gismt\/True_API\/#/g, '#');
+if (linkBase) {
+  const escaped = linkBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  html = html.replace(new RegExp(escaped + '#', 'g'), '#');
+}
 
 // Build heading text -> id map
 const headingIds = {};

@@ -10,7 +10,7 @@ Post-processes markdown:
 - Restores complex tables as raw HTML
 - Inserts <a id="..."> anchors before headings
 
-Usage: python convert.py <input.htm> <output_dir>
+Usage: python convert.py <input.htm> <output_dir> [internal_link_base]
 """
 import sys
 import os
@@ -20,6 +20,7 @@ from markdownify import markdownify as md_convert
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
+link_base = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else ''
 os.makedirs(output_dir, exist_ok=True)
 
 
@@ -38,9 +39,10 @@ for tag in soup.find_all(['script', 'style']):
     tag.decompose()
 
 # Internal links
-for a in soup.find_all('a', href=True):
-    if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
-        a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+if link_base:
+    for a in soup.find_all('a', href=True):
+        if a['href'].startswith(link_base + '#'):
+            a['href'] = a['href'].replace(link_base, '')
 
 # Protect complex tables
 complex_tables = {}

@@ -11,7 +11,7 @@ Post-processes markdown:
 - Inserts <a id="..."> anchors before headings
 - Restores complex tables as raw HTML
 
-Usage: python convert.py <input.htm> <output_dir>
+Usage: python convert.py <input.htm> <output_dir> [internal_link_base]
 """
 import sys
 import os
@@ -21,6 +21,7 @@ import html2text
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
+link_base = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else ''
 os.makedirs(output_dir, exist_ok=True)
 
 with open(input_file, 'r', encoding='utf-8') as f:
@@ -58,7 +59,9 @@ for idx, table in enumerate(soup.find_all('table')):
 # Convert
 h = html2text.HTML2Text()
 h.body_width = 0
-html2 = str(soup).replace('https://docs.crpt.ru/gismt/True_API/#', '#')
+html2 = str(soup)
+if link_base:
+    html2 = html2.replace(link_base + '#', '#')
 md = h.handle(html2)
 
 # Replace indented code blocks with fenced ones

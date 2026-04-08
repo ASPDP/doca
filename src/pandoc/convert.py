@@ -5,7 +5,7 @@ Pre-processes HTML:
 - Copies data-lang from <code> to <pre> class for language detection
 - Inserts <a id="..."> anchors inside headings for internal link targets
 
-Usage: python convert.py <input.htm> <output_dir>
+Usage: python convert.py <input.htm> <output_dir> [internal_link_base]
 """
 import sys
 import os
@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]
+link_base = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else ''
 os.makedirs(output_dir, exist_ok=True)
 
 with open(input_file, 'r', encoding='utf-8') as f:
@@ -22,9 +23,10 @@ with open(input_file, 'r', encoding='utf-8') as f:
 soup = BeautifulSoup(html, 'html.parser')
 
 # Internal links
-for a in soup.find_all('a', href=True):
-    if a['href'].startswith('https://docs.crpt.ru/gismt/True_API/#'):
-        a['href'] = a['href'].replace('https://docs.crpt.ru/gismt/True_API/', '')
+if link_base:
+    for a in soup.find_all('a', href=True):
+        if a['href'].startswith(link_base + '#'):
+            a['href'] = a['href'].replace(link_base, '')
 
 # Anchor IDs inside headings
 for h in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
