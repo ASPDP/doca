@@ -1,0 +1,14 @@
+[
+  {
+    "cisInfo": {
+      "requestedCis": "0105900516693190215/&3_lIpHPQDC91EE1092Qdd3awtGzYQD97tMLuTz0bAS7G7KxyAgQk22VWBFgoI=",
+      "cis": "0105900516693190215/&3_lIpHPQDC91EE1092Qdd3awtGzYQD97tMLuTz0bAS7G7KxyAgQk22VWBFgoI=",
+      "gtin": "",
+      "productGroup": null,
+      "packageType": null,
+      "generalPackageType": null
+    },
+    "errorMessage": "КМ/КИ не найден",
+    "errorCode": "404"
+  }
+]

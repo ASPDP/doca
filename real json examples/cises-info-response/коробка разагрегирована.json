@@ -1,0 +1,21 @@
+[
+  {
+    "_description": "POST https://markirovka.crpt.ru/api/v3/true-api/cises/info",
+    "_note": "Disaggregated box: status=DISAGGREGATION, packageType=LEVEL1 (box), child contains individual KI values",
+
+    "cisInfo": {
+      "requestedCis": "046102907301292453",
+      "productGroupId": 10,
+      "productGroup": "wheelchairs",
+      "packageType": "LEVEL1",
+      "generalPackageType": "BOX",
+      "status": "DISAGGREGATION",
+      "child": [
+        "0104610290730011215nF'nW0>iwsYN",
+        "0104610290730011215nf1/OcRi6InJ",
+        "0104610290730011215nF>fO(iXWnoJ",
+        "0104610290730011215Nf!p:plYq%ke"
+      ]
+    }
+  }
+]

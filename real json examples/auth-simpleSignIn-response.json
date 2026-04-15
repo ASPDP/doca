@@ -1,0 +1,6 @@
+{
+  "_description": "POST https://markirovka.crpt.ru/api/v3/true-api/auth/simpleSignIn",
+  "_note": "Step 2: Send signed uuid+data, receive bearer token (JWT). Token is ~11KB, valid for ~11 hours",
+
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwcm9kdWN0X2dyb3VwX2luZm8iOlt7Im5hbWUiOiJzb2Z0ZHJpbmtzIiwic3RhdHVzIjoiNSIsInR5cGVzIjpbIlJFVEFJTCIsIlRSQURFX1BBUlRJQ0lQQU5UIiwiV0hPTEVTQUxFUiJdfV0sInVzZXJfc3RhdHVzIjoiQUNUSVZFIiwiZnVsbF9uYW1lIjoiLi4uIiwic2NvcGUiOlsidHJ1c3RlZCJdLCJpbm4iOiI2NjA0MDI2OTgwIiwicGlkIjoxMTAwMDA0NTUwOSwiaWQiOjE0MDAwMjQ4MjA0LCJleHAiOjE3NzU0MDU3ODMsIm9yZ2FuaXNhdGlvbl9zdGF0dXMiOiJSRUdJU1RFUkVEIiwianRpIjoiNjQ1N2FmNTEtMmFjZS00MTkxLTkwM2ItODMzY2E3ZDRiMTQ0IiwiY2xpZW50X2lkIjoiY3JwdC1zZXJ2aWNlIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiIsIi4uLiJdfQ.N55q-YYTugb3E1YmhCq8KLSuFJ4QaZwN39RLQ3jbkRQ"
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "cisInfo": {
+      "requestedCis": "01059",
+      "cis": "01059",
+      "gtin": "",
+      "productGroup": null,
+      "packageType": null,
+      "generalPackageType": null
+    },
+    "errorMessage": "КИ не найден",
+    "errorCode": "404"
+  }
+]

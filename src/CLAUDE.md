@@ -6,16 +6,16 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 
 ## Project structure
 
-- `source htmls/` — original HTML files (input)
-- `src/<converter>/` — conversion scripts (pandoc, markdownify)
-- `src/common.py` — shared pre-processing utilities
-- `mds/<html_name>/<converter>/README.md` — conversion output
-- `convert_all.sh` — runs all converters for all sources
+- `src/source htmls/` — original HTML files (input)
+- `src/scripts/<converter>/` — conversion scripts (pandoc, markdownify)
+- `src/scripts/common.py` — shared pre-processing utilities
+- `src/mds/<html_name>/<converter>/README.md` — conversion output
+- `src/convert_all.sh` — runs all converters for all sources
 
 ## Rules
 
-- When fixing or re-running any conversion, update the corresponding script in `src/`.
-- Run `bash convert_all.sh` to regenerate all outputs.
+- When fixing or re-running any conversion, update the corresponding script in `src/scripts/`.
+- Run `bash src/convert_all.sh` from the submodule root to regenerate all outputs.
 
 ## Conversion notes
 

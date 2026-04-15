@@ -1,0 +1,7 @@
+{
+  "_description": "GET https://markirovka.crpt.ru/api/v3/true-api/auth/key",
+  "_note": "Step 1: Get auth key. The 'data' field must be signed with CryptoPro, then sent to simpleSignIn",
+
+  "uuid": "faadd8f8-febc-4eb3-8258-2407143227b7",
+  "data": "UWLXRUCFVSOFLCJVEUKNBFGPHKWKEU"
+}

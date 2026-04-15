@@ -1,0 +1,54 @@
+[
+  {
+    "_description": "POST https://markirovka.crpt.ru/api/v3/true-api/cises/info",
+    "_note": "Response is an array of objects. Each object has either cisInfo (success) or errorCode/errorMessage (failure)",
+
+    "cisInfo": {
+      "applicationDate": "2025-01-15T04:29:32.150Z",
+      "introducedDate": "2025-01-29T05:37:55.387Z",
+      "partyNumber": "1202317787",
+      "isMultipleSales": false,
+      "isTracking": false,
+      "importerInn": "7721504871",
+      "importerName": "ООО \"БЕЛЛА ВОСТОК\"",
+      "requestedCis": "0105900516693190215&.I0,\"kj;c+m",
+      "cis": "0105900516693190215&.I0,\"kj;c+m",
+      "gtin": "05900516693190",
+      "tnVedEaes": "9619008909",
+      "tnVedEaesGroup": "9619",
+      "productName": "Вкладыши урологические для мужчин SENI MAN в размерах: extra по 15 шт.",
+      "productGroupId": 10,
+      "productGroup": "wheelchairs",
+      "brand": "SENI",
+      "producedDate": "2025-01-15T00:00:00.000Z",
+      "emissionDate": "2025-01-10T08:51:47.200Z",
+      "emissionType": "FOREIGN",
+      "packageType": "UNIT",
+      "generalPackageType": "UNIT",
+      "ownerInn": "6686128274",
+      "ownerName": "ООО \"МАЗАЛЬ\"",
+      "status": "RETIRED",
+      "statusEx": "EMPTY",
+      "child": [],
+      "producerInn": "7721504871",
+      "producerName": "ООО \"БЕЛЛА ВОСТОК\"",
+      "markWithdraw": false,
+      "withdrawReason": "STATE_CONTRACT",
+      "expirationDate": "2030-01-31T00:00:00.000Z",
+      "partialSaleInfo": {
+        "soldUnitCount": 0,
+        "rest": 15,
+        "correctRest": true,
+        "innerUnitCount": 15
+      },
+      "certDoc": [
+        {
+          "number": "ФСЗ 2010/06096",
+          "type": "REGISTRATION_CERTIFICATE",
+          "date": "2016-12-05",
+          "indx": 3643016
+        }
+      ]
+    }
+  }
+]
