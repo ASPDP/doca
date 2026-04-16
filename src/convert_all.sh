@@ -1,9 +1,28 @@
 #!/usr/bin/env bash
-# Convert all HTML sources to markdown using pandoc and markdownify.
+# Download HTML sources from settings.cfg and convert them to markdown.
 # Usage: bash src/convert_all.sh
 # Run from the submodule root.
 
-set -e
+set -euo pipefail
+
+SETTINGS_FILE="src/settings.cfg"
+
+trim() {
+    local value="$1"
+
+    value="${value#${value%%[![:space:]]*}}"
+    value="${value%${value##*[![:space:]]}}"
+
+    printf '%s' "$value"
+}
+
+download() {
+    local url="$1"
+    local output="$2"
+
+    echo "=== Downloading: $url -> $output ==="
+    curl --fail --location --silent --show-error "$url" --output "$output"
+}
 
 convert() {
     local input="$1"
@@ -11,18 +30,88 @@ convert() {
     local link_base="$3"
 
     echo "=== Converting: $input ==="
-    python  src/scripts/pandoc/convert.py       "$input" "$outdir/pandoc"       "$link_base"
-    python  src/scripts/markdownify/convert.py  "$input" "$outdir/markdownify"  "$link_base"
+    rm -rf "$outdir"
+    python src/scripts/pandoc/convert.py "$input" "$outdir/pandoc" "$link_base"
+    python src/scripts/markdownify/convert.py "$input" "$outdir/markdownify" "$link_base"
 }
 
-convert \
-    "src/source htmls/docs.crpt.ru_gismt_True_API_.htm" \
-    "src/mds/docs.crpt.ru_gismt_True_API_" \
-    "https://docs.crpt.ru/gismt/True_API/"
+run_entry() {
+    local name="$1"
+    local file="$2"
+    local output="$3"
+    local url="$4"
+    local link_base="$5"
 
-convert \
-    "src/source htmls/ГИС МТ ЭДО.html" \
-    "src/mds/ГИС МТ ЭДО" \
-    "https://docs.crpt.ru/gismt/%D0%9C%D0%B5%D1%82%D0%BE%D0%B4%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5_%D1%80%D0%B5%D0%BA%D0%BE%D0%BC%D0%B5%D0%BD%D0%B4%D0%B0%D1%86%D0%B8%D0%B8_%D0%BF%D0%BE_%D0%BE%D1%84%D0%BE%D1%80%D0%BC%D0%BB%D0%B5%D0%BD%D0%B8%D1%8E_%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%BE%D0%B2_%D0%AD%D0%94%D0%9E/"
+    if [[ -z "$file" || -z "$output" || -z "$url" || -z "$link_base" ]]; then
+        echo "Incomplete config section: $name" >&2
+        exit 1
+    fi
+
+    local input_path="src/source-html/$file"
+    local output_path="src/mds/$output"
+
+    download "$url" "$input_path"
+    convert "$input_path" "$output_path" "$link_base"
+}
+
+if [[ ! -f "$SETTINGS_FILE" ]]; then
+    echo "Missing settings file: $SETTINGS_FILE" >&2
+    exit 1
+fi
+
+mkdir -p src/source-html src/mds
+
+current_section=""
+current_file=""
+current_output=""
+current_url=""
+current_link_base=""
+
+while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
+    line="$(trim "$raw_line")"
+
+    if [[ -z "$line" || "$line" == \#* || "$line" == \;* ]]; then
+        continue
+    fi
+
+    if [[ "$line" =~ ^\[(.+)\]$ ]]; then
+        if [[ -n "$current_section" ]]; then
+            run_entry "$current_section" "$current_file" "$current_output" "$current_url" "$current_link_base"
+        fi
+
+        current_section="${BASH_REMATCH[1]}"
+        current_file=""
+        current_output=""
+        current_url=""
+        current_link_base=""
+        continue
+    fi
+
+    key="$(trim "${line%%=*}")"
+    value="$(trim "${line#*=}")"
+
+    case "$key" in
+        file)
+            current_file="$value"
+            ;;
+        output)
+            current_output="$value"
+            ;;
+        url)
+            current_url="$value"
+            ;;
+        link_base)
+            current_link_base="$value"
+            ;;
+        *)
+            echo "Unknown key in $SETTINGS_FILE: $key" >&2
+            exit 1
+            ;;
+    esac
+done < "$SETTINGS_FILE"
+
+if [[ -n "$current_section" ]]; then
+    run_entry "$current_section" "$current_file" "$current_output" "$current_url" "$current_link_base"
+fi
 
 echo "Done."

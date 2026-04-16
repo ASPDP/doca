@@ -6,7 +6,8 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 
 ## Project structure
 
-- `src/source htmls/` — original HTML files (input)
+- `src/settings.cfg` — document list, source URLs, and output paths
+- `src/source-html/` — downloaded HTML files (input)
 - `src/scripts/<converter>/` — conversion scripts (pandoc, markdownify)
 - `src/scripts/common.py` — shared pre-processing utilities
 - `src/mds/<html_name>/<converter>/README.md` — conversion output
@@ -15,7 +16,7 @@ HTML-to-Markdown conversion comparison for docs.crpt.ru GISMT True API documenta
 ## Rules
 
 - When fixing or re-running any conversion, update the corresponding script in `src/scripts/`.
-- Run `bash src/convert_all.sh` from the submodule root to regenerate all outputs.
+- Run `bash src/convert_all.sh` from the submodule root to download sources and regenerate all outputs.
 
 ## Conversion notes
 
